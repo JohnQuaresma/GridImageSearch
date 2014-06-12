@@ -4,5 +4,10 @@
     <string name="app_name">GridImageSearch</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_main1">Main1Activity</string>
+    <string name="title_activity_search">Image Search</string>
+    <string name="enter_search_term">Enter Search Term</string>
+    <string name="search">Search</string>
+    <string name="title_activity_image_display">ImageDisplayActivity</string>
 
 </resources>

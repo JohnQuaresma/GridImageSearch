@@ -4,9 +4,13 @@
     android:layout_height="match_parent"
     tools:context="${packageName}.${activityClass}" >
 
-    <TextView
+    <com.loopj.android.image.SmartImageView
+        android:id="@+id/ivResult"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
-
+        android:layout_alignParentLeft="true"
+        android:maxWidth="600dp"
+        android:layout_alignParentTop="true"
+        android:src="@android:drawable/screen_background_light" />
+    
 </RelativeLayout>
