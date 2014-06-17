@@ -27,6 +27,8 @@ public class SearchActivity extends Activity {
 
 	public static final String SETTINGS_PARAM = "settings";
 	private static final int SETTINGS_REQUEST = 1;
+	private static final int RESULT_SIZE = 8;
+	private static final int MAX_PAGES = 8;
 	private static final String BASE_SEARCH_URL = "https://ajax.googleapis.com/ajax/services/search/images";
 	private EditText etQuery;
 	private GridView gvResults;
@@ -35,11 +37,22 @@ public class SearchActivity extends Activity {
 	private ImageResultArrayAdapter imageAdapter;
 	private SearchSettings searchSettings;
 	private Integer startIndex;
+	private String currentQuery;
 	
 	private void setupViews() {
 		etQuery = (EditText) findViewById(R.id.etQuery);
 		gvResults = (GridView) findViewById(R.id.gvResults);
 		btnSearch = (Button) findViewById(R.id.btnSearch);
+	}
+	
+	private void setupScrolling() {
+		gvResults.setOnScrollListener(new EndlessScrollListener() {
+		    @Override
+		    public void onLoadMore(int page, int totalItemsCount) {
+		    	 Log.d("DEBUG", String.format("page: %s - total count: %s.", page, totalItemsCount));
+	             loadMoreImages(page);
+		    }
+	    });
 	}
 	
 	private void addSettingsParams(StringBuilder urlBuffer) {
@@ -61,6 +74,47 @@ public class SearchActivity extends Activity {
 		}
 	}
 	
+	private void loadMoreImages(int page) {
+		startIndex = (page - 1) * RESULT_SIZE;
+		Log.d("DEBUG", String.format("Incremented start index to %s", startIndex));
+		
+		if (startIndex >= (MAX_PAGES * RESULT_SIZE)) {
+			return;
+		}
+		search();
+	}
+	
+	private void search() {
+		AsyncHttpClient client = new AsyncHttpClient();
+		StringBuilder urlBuilder = new StringBuilder(BASE_SEARCH_URL);
+		final int start = this.startIndex;
+		urlBuilder.append("?rsz=" + RESULT_SIZE);
+		urlBuilder.append("&v=1.0");
+		urlBuilder.append("&start=" + start);
+		urlBuilder.append("&q=" + Uri.encode(currentQuery));
+		addSettingsParams(urlBuilder);
+		Log.d("DEBUG", urlBuilder.toString());
+		client.get(urlBuilder.toString(), new JsonHttpResponseHandler() {
+				@Override
+				public void onSuccess(JSONObject response) {
+					Log.d("DEBUG", response.toString());
+					JSONArray imageJsonResults = null;
+					try {
+						imageJsonResults = response.getJSONObject("responseData").getJSONArray("results");
+						
+						if (start == 0) {
+							imageResults.clear();
+						}
+						
+						imageAdapter.addAll(ImageResult.fromJSONArray(imageJsonResults));
+						Log.d("DEBUG", imageResults.toString());
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
+		});
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -80,12 +134,15 @@ public class SearchActivity extends Activity {
 				startActivity(i);
 			}
 		});
+		setupScrolling();
 	}
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == SETTINGS_REQUEST) {
 			searchSettings = (SearchSettings) data.getSerializableExtra(SETTINGS_PARAM);
+			startIndex = 0;
+			search();
 		}
 	}
 	
@@ -103,28 +160,8 @@ public class SearchActivity extends Activity {
 	}
 	
 	public void onImageSearch(View view) {
-		String query = etQuery.getText().toString();
-		AsyncHttpClient client = new AsyncHttpClient();
-		StringBuilder urlBuilder = new StringBuilder(BASE_SEARCH_URL);
-		urlBuilder.append("?rsz=8");
-		urlBuilder.append("&v=1.0");
-		urlBuilder.append("&start=" + startIndex);
-		urlBuilder.append("&q=" + Uri.encode(query));
-		addSettingsParams(urlBuilder);
-		client.get(urlBuilder.toString(), new JsonHttpResponseHandler() {
-				@Override
-				public void onSuccess(JSONObject response) {
-					Log.d("DEBUG", response.toString());
-					JSONArray imageJsonResults = null;
-					try {
-						imageJsonResults = response.getJSONObject("responseData").getJSONArray("results");
-						imageResults.clear();
-						imageAdapter.addAll(ImageResult.fromJSONArray(imageJsonResults));
-						Log.d("DEBUG", imageResults.toString());
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-				}
-		});
+		currentQuery = etQuery.getText().toString();
+		startIndex = 0;
+		search();
 	}
 }

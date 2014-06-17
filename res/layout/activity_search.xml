@@ -32,7 +32,9 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/btnSearch"
         android:layout_marginTop="17dp"
-        android:numColumns="3" >
+        android:numColumns="3"
+        android:paddingLeft="20dp" >
+
     </GridView>
 
 </RelativeLayout>
