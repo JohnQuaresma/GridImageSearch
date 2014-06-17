@@ -28,6 +28,10 @@
             android:name="codepath.apps.gridimagesearch.ImageDisplayActivity"
             android:label="@string/title_activity_image_display" >
         </activity>
+        <activity
+            android:name="codepath.apps.gridimagesearch.SettingsActivity"
+            android:label="@string/title_activity_settings" >
+        </activity>
     </application>
 
 </manifest>

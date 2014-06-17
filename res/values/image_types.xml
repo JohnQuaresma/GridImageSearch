@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="images_type_array">
+        <item>---</item>
+        <item>Faces</item>
+        <item>Photographic</item>
+        <item>Clipart</item>
+        <item>Line Drawing</item>
+    </string-array>
+</resources>
